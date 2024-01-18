@@ -32,7 +32,8 @@
     <input type="password" id="confirmPassword" name="confirmPassword" required="required"/>
 
     <button type="submit">Register</button>
-    <jsp:include page="footer.jsp"/>
 </form:form>
+
+<jsp:include page="footer.jsp"/>
 </body>
 </html>

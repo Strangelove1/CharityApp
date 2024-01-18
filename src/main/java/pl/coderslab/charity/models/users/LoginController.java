@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/login")
 public class LoginController {
 
     private final UserRepository userRepository;
@@ -44,9 +43,9 @@ public class LoginController {
         if (user != null) {
             session.setAttribute("user", user);
             if (user.getEnable() == 1){
-                return "adminDashboard";
+                return "redirect:/adminDashboard";
             }
-            return "userDashboard";
+            return "redirect:/userDashboard";
         } else {
             // Failed login
             bindingResult.rejectValue("email", "error.loginForm", "Invalid email or password");

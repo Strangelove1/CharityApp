@@ -1,18 +1,28 @@
 package pl.coderslab.charity.models.users;
 
+import org.hibernate.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import pl.coderslab.charity.models.donation.Donation;
+import pl.coderslab.charity.models.donation.DonationRepository;
+import pl.coderslab.charity.models.institution.InstitutionRepository;
+
+import javax.servlet.http.HttpSession;
 
 @RequestMapping("/user")
 @Controller
 public class UserController {
 
     private final UserRepository userRepository;
+    private final DonationRepository donationRepository;
+    private final InstitutionRepository institutionRepository;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, DonationRepository donationRepository, InstitutionRepository institutionRepository) {
         this.userRepository = userRepository;
+        this.donationRepository = donationRepository;
+        this.institutionRepository = institutionRepository;
     }
 
     @GetMapping("/registerUser")
@@ -48,12 +58,39 @@ public class UserController {
     public String showCreatedAdmin(@ModelAttribute @Validated User user, Model model){
         return "adminAdded";
     }
-//    Tutaj nadal do zmiany
+
+    @RequestMapping("/userDashboard")
+    public String showUserDashboard(Model model, HttpSession session){
+        User user = (User) session.getAttribute("user");
+        if (user == null){
+            return "noLoginDashboardEntry";
+        }
+        Long userId = user.getId();
+        model.addAttribute("donations", donationRepository.findDonationByUser_Id(userId));
+        return "userDashboard";
+    }
+
+    @RequestMapping("/adminDashboard")
+    public String showAdminDashboard(Model model, HttpSession session){
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "noLoginDashboardEntry";
+        }
+        if (user.getEnable() == 0){
+            return "adminLoginWarning";
+        }
+        model.addAttribute("admins", userRepository.findUsersByEnable(1));
+        model.addAttribute("institututions", institutionRepository.findAll());
+        model.addAttribute("users", userRepository.findUsersByEnable(0));
+        return "adminDashboard";
+    }
+
+//to be edited
     @GetMapping("/updateUser/{id}")
     public String showUpdateUserForm(@PathVariable("id") Long id, Model model) {
         User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         model.addAttribute("user", user);
-        return "user/updateUser";
+        return "userUpdate";
     }
 
     @PostMapping("/updateUser/{id}")
@@ -67,7 +104,7 @@ public class UserController {
     public String deleteUser(@PathVariable("id") Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         userRepository.delete(user);
-        return "redirect:/user/userDeleted";
+        return "userDeleted";
     }
 
 }
