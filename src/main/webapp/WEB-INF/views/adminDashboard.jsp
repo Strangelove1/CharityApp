@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
   User: riain
@@ -12,7 +13,12 @@
 </head>
 <body>
 <jsp:include page="header.jsp"/>
-Tutaj admin dashboard
+
+<h2><c:url value="institution/list">Lista fundacji</c:url></h2>
+<br>
+<h2><c:url value="/user/listUsers">Lista użytkowników</c:url> </h2>
+<br>
+<h2><c:url value="/donation/listDonations">Lista donacji</c:url> </h2>
 <jsp:include page="footer.jsp"/>
 </body>
 </html>

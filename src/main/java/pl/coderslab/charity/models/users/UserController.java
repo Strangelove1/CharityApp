@@ -1,15 +1,12 @@
 package pl.coderslab.charity.models.users;
-
-import org.hibernate.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import pl.coderslab.charity.models.donation.Donation;
 import pl.coderslab.charity.models.donation.DonationRepository;
 import pl.coderslab.charity.models.institution.InstitutionRepository;
-
 import javax.servlet.http.HttpSession;
+import java.util.Objects;
 
 @RequestMapping("/user")
 @Controller
@@ -25,6 +22,13 @@ public class UserController {
         this.institutionRepository = institutionRepository;
     }
 
+    @GetMapping("/listUsers")
+    public String listUsers(Model model) {
+        model.addAttribute("users", userRepository.findAll());
+        return "userList";
+    }
+
+
     @GetMapping("/registerUser")
     public String showAddUserForm(Model model){
         model.addAttribute("user", new User());
@@ -33,7 +37,7 @@ public class UserController {
 
     @PostMapping("/registerUser")
     public String addUserForm(@ModelAttribute @Validated User user){
-        if (user.getPassword() == "admin") {
+        if (Objects.equals(user.getPassword(), "admin")) {
             user.setEnable(1);
             userRepository.save(user);
             return "redirect:/user/adminAdded";
@@ -86,19 +90,24 @@ public class UserController {
     }
 
 //to be edited
-    @GetMapping("/updateUser/{id}")
-    public String showUpdateUserForm(@PathVariable("id") Long id, Model model) {
-        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+    @GetMapping("/updateUser")
+    public String showUpdateUserForm(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null){
+            return "noLoginDashboardEntry";
+        }
         model.addAttribute("user", user);
         return "userUpdate";
     }
 
-    @PostMapping("/updateUser/{id}")
-    public String updateUser(@PathVariable("id") Long id, @ModelAttribute("user") User user, Model model) {
-        model.addAttribute("user", user);
-        userRepository.save(user);
-        return "redirect:/userUpdated/" + user.getId();
-    }
+    @PostMapping("/updateUser")
+    public String updateUser(@ModelAttribute("user") User user, Model model) {
+        if (user != null) {
+            userRepository.save(user);
+            return "redirect:/userDashboard";
+        }
+        return "noLoginDashboardEntry";
+        }
 
     @RequestMapping("/deleteUser/{id}")
     public String deleteUser(@PathVariable("id") Long id) {

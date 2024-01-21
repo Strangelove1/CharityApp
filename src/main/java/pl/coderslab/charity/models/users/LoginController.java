@@ -43,9 +43,9 @@ public class LoginController {
         if (user != null) {
             session.setAttribute("user", user);
             if (user.getEnable() == 1){
-                return "redirect:/adminDashboard";
+                return "redirect:user/adminDashboard";
             }
-            return "redirect:/userDashboard";
+            return "redirect:user/userDashboard";
         } else {
             // Failed login
             bindingResult.rejectValue("email", "error.loginForm", "Invalid email or password");
